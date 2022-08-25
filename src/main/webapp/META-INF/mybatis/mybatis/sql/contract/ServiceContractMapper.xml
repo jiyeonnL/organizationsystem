@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="radius.contract.serviceContract.ra.rao.itf.IServiceContractRAO">	
+
+	<!-- 모든 약관 조회 -->
+	<select id="selectTerms" resultType="TermDTO" >
+		SELECT 
+			TERMSEQ, 
+			NUM, 
+			"ORDER", 
+			TITLE, 
+			CONTENT,
+			FILEID, 
+			POSTYN, 
+			BMID, 
+			REGID AS WRITENAME, 
+			REGDATE AS WRITEDATE
+		FROM 
+			TERMS
+	</select>
+	
+	
+	<!-- 상세 약관 조회 -->
+	<select id="selectTerm" parameterType="int" resultType="TermDTO" >
+		SELECT 
+			TERMSEQ, 
+			NUM, 
+			"ORDER", 
+			TITLE, 
+			CONTENT,
+			FILEID, 
+			POSTYN, 
+			BMID, 
+			REGID AS WRITENAME, 
+			REGDATE AS WRITEDATE
+		FROM 
+			TERMS
+		WHERE
+			1=1
+			AND
+			TERMSEQ = #{termSeq}
+	</select>
+
+</mapper>

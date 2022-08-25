@@ -1,0 +1,19 @@
+@charset "UTF-8";
+.bt-normal{
+    background-color: rgb(71, 117, 209);
+}
+.bt-normal:hover{
+    background-color: rgb(41, 82, 163);
+}
+#remove{
+    background-color: rgb(184, 46, 46);
+}
+#remove:hover{
+    background-color: rgb(163, 41, 41);
+}
+#cancel{
+    background-color: rgb(255, 173, 51);
+}
+#cancel:hover{
+    background-color: rgb(255, 153, 0);
+}

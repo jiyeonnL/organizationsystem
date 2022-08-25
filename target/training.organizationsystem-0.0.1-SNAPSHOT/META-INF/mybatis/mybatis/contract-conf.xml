@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="logImpl" value="LOG4J2" />
+	</settings>
+	<typeAliases> 
+		<typeAlias type="radius.contract.bm.dto.BmDTO" alias="BmDTO" />
+		<typeAlias type="radius.contract.bm.dto.BrandDTO" alias="BrandDTO" />
+        <typeAlias type="radius.contract.serviceContract.dto.TermDTO" alias="TermDTO" />
+		<typeAlias type="radius.contract.contract.dto.ContractListRequestDTO" alias="ContractListRequestDTO" />
+        <typeAlias type="radius.contract.contract.dto.ContractListResponseDTO" alias="ContractListResponseDTO" />
+	</typeAliases>
+	<plugins>
+		<plugin interceptor="com.github.pagehelper.PageInterceptor">
+			<!--  <property name="dialect" value="db2"/>-->
+			<property name="reasonable" value="true"/>
+		</plugin>
+	</plugins>
+	<mappers>
+		<mapper resource="/META-INF/mybatis/sql/contract/BmMapper.xml" />
+		<mapper resource="/META-INF/mybatis/sql/contract/ServiceContractMapper.xml" />
+        <mapper resource="/META-INF/mybatis/sql/contract/ContractMapper.xml" />
+	</mappers>
+</configuration>

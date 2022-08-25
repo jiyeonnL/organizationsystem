@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	default-init-method="init" default-destroy-method="destory"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    
+<mvc:annotation-driven>
+    <mvc:message-converters>
+        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+<!--             <property name="objectMapper" ref="objectMapper"/> -->
+        </bean>
+    </mvc:message-converters>
+</mvc:annotation-driven>
+  <context:component-scan base-package="organizationsystem"></context:component-scan>
+
+    <bean id="departmentImpl" class="organizationsystem.biz.DepartmentImpl">
+        <property name="rao" ref="departmentRao" />
+    </bean>
+   
+    <bean id="departmentRao" class="organizationsystem.rao.DepartmentRAO">
+    </bean>
+        
+    <bean id="employeeImpl" class="organizationsystem.biz.EmployeeImpl">
+        <property name="rao" ref="employeeRAOImpl" />
+    </bean>
+    
+    <bean id="employeeRAOImpl" class="organizationsystem.rao.EmployeeRAOImpl">
+        <property name="mapper" ref="employeeMapper" />
+    </bean>
+        
+    <bean id="employeeMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="organizationsystem.rao.itf.EmployeeRAO" />
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+   
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:/META-INF/mybatis/organizationsystem-conf.xml">
+        </property>
+        <property name="dataSource" ref="radiusXADataSource"></property>
+    </bean>
+    
+    <jee:jndi-lookup jndi-name="java:/RadiusXADS" id="radiusXADataSource" />
+
+    <!-- 
+    <mybatis-spring:scan base-package="organizationsystem"></mybatis-spring:scan>
+     -->
+     
+<!-- <bean id="objectMapper" class="com.example.blog_server4.CustomObjectMapper"></bean> -->
+   
+
+</beans>

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="radius.contract.bm.ra.rao.itf.BmRAO">	
+
+
+
+    <!-- 전체 브랜드 조회 -->
+	<select id="selectBrands" resultType="BrandDTO" >
+		SELECT 
+			BRNDID, 
+			BRNDNAM,
+			REGID,
+			REGDATE,
+			UPDID,
+			UPDDATE,
+			(SELECT 
+			    NAME 
+			FROM 
+			    RADIUS.OPERATOR 
+			WHERE 
+			    ACCOUNTID = B.REGID
+			    ) AS REGNAM
+		FROM 
+			RADIUS.BRNDMNG B
+		ORDER BY
+		    REGDATE DESC
+	</select>
+	
+	<!-- 브랜드 조회 -->
+	<select id="selectBrand" resultType="BrandDTO" >
+		SELECT 
+			BRNDID, 
+			BRNDNAM,
+			REGID,
+			REGDATE,
+			UPDID,
+			UPDDATE,
+			(SELECT 
+			    NAME 
+			FROM 
+			    RADIUS.OPERATOR 
+			WHERE 
+			    ACCOUNTID = B.REGID
+			    ) AS REGNAM
+		FROM 
+			RADIUS.BRNDMNG B
+		WHERE
+		    BRNDID = #{brndId}
+	</select>
+	
+	<!-- 브랜드 등록 -->
+	<insert id="insertBrand" parameterType="BrandDTO">
+
+		INSERT INTO BRNDMNG
+		    (
+            BRNDID, 
+			BRNDNAM,
+			REGID,
+			REGDATE,
+			UPDID,
+			UPDDATE	
+            )VALUES(
+           		#{brndId},
+           		#{brndNam},
+           		#{regId},
+           		CURRENT_TIMESTAMP,
+           		#{updId}, 
+           		CURRENT_TIMESTAMP
+          )
+	</insert>
+	
+	<!-- 브랜드 수정 -->
+	<update id="updateBrand" parameterType="BrandDTO">
+        UPDATE
+            BRNDMNG
+        SET
+            BRNDNAM = #{brndNam},
+            UPDID = #{updId},
+            UPDDATE = CURRENT_TIMESTAMP
+        WHERE
+            BRNDID = #{brndId}
+    </update>
+	
+	<!-- 브랜드 삭제 -->
+	<delete id="deleteBrand">
+        DELETE FROM BRNDMNG
+        WHERE
+            BRNDID = #{brndId}
+    </delete>
+    
+	<!--  USERID 검색
+	(SELECT  
+	    OP.NAME AS REGNAM
+	FROM 
+	    RADIUS.OPERATOR OP LEFT JOIN RADIUS.ACCOUNT AC 
+	ON 
+	    OP.ACCOUNTID = AC.ACCOUNTID 
+	WHERE 
+	    AC.USERID = BM.REGID)	
+	 -->
+    
+    <!-- 전체 BM 조회 -->
+	<select id="selectBms" parameterType="BmDTO" resultType="BmDTO" >
+		SELECT
+		    BM.BMID, 
+		    (SELECT 
+		        BRNDNAM 
+		    FROM 
+		        RADIUS.BRNDMNG BR
+		    WHERE 
+		       BR.BRNDID  = BM.BRNDID
+		        ) AS BRNDNAM,
+		    BM.BRNDID, 
+		    BM.BMNAM, 
+		    BM.APVYN, 
+		    BM.BMCONT, 
+		    BM.REGID,
+		    BM.REGDATE,
+		    BM.UPDID,
+		    BM.UPDDATE,
+		    (SELECT 
+		        NAME 
+		    FROM 
+		        RADIUS.OPERATOR 
+		    WHERE 
+		        ACCOUNTID = BM.REGID
+		    ) AS REGNAM
+		FROM 
+		    RADIUS.BMMNG BM
+		where
+		    1=1 
+		<if test="brndId != null and brndId != ''">
+		    AND
+		    BM.BRNDID = #{brndId}
+		</if>
+		<if test="apvYn != null and apvYn != ''">
+		    AND
+		    BM.APVYN = #{apvYn}
+		</if>
+		ORDER BY
+		    REGDATE DESC
+	</select>
+	 
+	<!-- BM 조회 -->
+	<select id="selectBm" resultType="BmDTO" >
+		SELECT
+		    BM.BMID, 
+		    BM.BRNDID,
+		    BM.BMNAM, 
+		    BM.APVYN, 
+		    BM.BMCONT,  
+		    BM.REGID,
+		    BM.REGDATE,
+		    BM.UPDID,
+		    BM.UPDDATE,
+		    (SELECT 
+		        NAME 
+		    FROM 
+		        RADIUS.OPERATOR 
+		    WHERE 
+		        ACCOUNTID = BM.REGID
+		    ) AS REGNAM 
+		FROM 
+		    RADIUS.BMMNG BM
+		WHERE
+		    BM.BMID = #{bmId} 
+	</select>
+	
+	<!-- BM 등록 -->
+	<insert id="insertBm" parameterType="BmDTO">
+		INSERT INTO BMMNG
+		    (
+		    BMID,
+		    BRNDID,
+		    BMNAM, 
+		    APVYN, 
+		    BMCONT,  
+		    REGID,
+		    REGDATE,
+		    UPDID,
+		    UPDDATE
+            )VALUES(
+                #{bmId},
+           	    #{brndId},
+           	    #{bmNam},
+           	    #{apvYn},
+           	    #{bmCont},
+           	    #{regId},
+           	    CURRENT_TIMESTAMP,
+           	    #{updId}, 
+           	    CURRENT_TIMESTAMP
+            )
+	</insert>
+	
+    <!-- BM 수정 -->
+	<update id="updateBm" parameterType="BmDTO">
+        UPDATE
+            BMMNG
+        SET
+            BRNDID = #{brndId},
+            BMNAM = #{bmNam},
+            APVYN = #{apvYn},
+            BMCONT = #{bmCont},
+            UPDID = #{updId},
+            UPDDATE = CURRENT_TIMESTAMP
+        WHERE
+            BMID = #{bmId}
+    </update>
+    
+    <!-- BM 삭제 -->
+	<delete id="deleteBm">
+        DELETE FROM BMMNG
+        WHERE
+            BMID = #{bmId}
+    </delete>
+    
+    <!-- MEMBERBM 및 STATION 조회 -->
+    <select id="selectInUseByBmId" resultType="int">
+        SELECT
+            (SELECT 
+                COUNT(*) 
+            FROM 
+                RADIUS.STATION 
+            WHERE 
+                BMID = #{bmId}) + 
+            (SELECT 
+                COUNT(*)
+            FROM 
+                RADIUS.MEMBERBM 
+            WHERE 
+                BMID = #{bmId}) AS COUNTBMID 
+        FROM 
+            SYSIBM.SYSDUMMY1
+    </select>
+	 
+	 
+
+</mapper>

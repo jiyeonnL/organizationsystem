@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script> 
+<meta charset="UTF-8">
+<title>직원</title>
+<link rel="stylesheet" type="text/css" href = "css/all.css">
+<style>
+.bt{
+    background-color: rgb(71, 117, 209);
+}
+.bt:hover{
+    background-color: rgb(41, 82, 163);
+}
+.clickedBt{
+    background-color: rgb(163, 163, 194) !important;
+    border-color: rgb(163, 163, 194) !important;
+    text-decoration-line: underline;
+}
+.pbt, #prev, #next{
+    background-color: rgb(209, 209, 224);
+    border-color: rgb(209, 209, 224);
+}
+</style>
+
+</head>
+<body>
+<div id="body">
+<div id="inner">
+<h2 class="heavy">직원 목록</h2>
+<br/>
+<h4 class="heavy"><a href="list.html">부서 조회하러 가기</a></h4>
+<br/><br/>
+
+<table class="table clean">
+   <thead>
+     <tr>
+       <th>소속부서</th>
+       <th>이름</th>
+       <th>직급</th>
+       <th>입사일</th>
+       <th>생년월일</th>
+     </tr>
+   </thead>
+   <tbody id="employAll">
+       <tr v-for="employ in employs">
+         <td>{{employ.dname}}</td>
+         <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>                         
+         <td>{{employ.position}}</td>                          
+         <td>{{employ.hiredDate}}</td>         
+         <td>{{employ.birth}}</td>
+       </tr>     
+   </tbody>
+</table>
+
+<br/><br/>
+
+<span id="pages">
+</span>
+
+<br/><br/><br/><br/>
+
+<h3 class="heavy">직원 등록</h3>
+&nbsp&nbsp
+
+<div class="clean">
+    <span>
+      <select v-model="departId">
+        <option v-for="depart in departs" :value="depart.id">{{depart.name}}</option>
+      </select>
+    </span>
+                    
+    <span>
+      <input type="text" v-model="name" class="inputs" placeholder="이름">
+    </span>
+                   
+    <span>
+      <input type="text" v-model="position" class="inputs" placeholder="직급">
+    </span>
+                        
+    <span>
+      <input type="text" v-model="hiredDate" class="inputs" placeholder="입사일">
+    </span>
+    
+    <span>
+      <input type="text" v-model="birth" class="inputs" placeholder="생년월일">
+    </span>
+    
+    &nbsp <button class="bt" type="submit" id="submit" @click="submit">등록</button>
+    <!-- <button class="btn btn-warning" id="cancel">취소</button>  -->
+</div>
+    <br/><br/>
+</div>
+</div>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- <script src="jquery/list_E.js"></script>  -->
+
+
+    <script>
+        new Vue({
+        	el: "#inner",
+        	data: {
+        		departs: [ ],
+        		departId: 1,
+        		employs: [ ],
+                name: "",
+                position: "",
+                hiredDate: "",
+                birth: ""
+        	},
+        	methods:{
+        		employList: async function(){
+        			await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee')
+                    .then((res)=> {
+                        this.employs = res.data;
+                        return res.data
+                    })
+        		},
+        		getDepartList: async function(){
+                    await axios.get('http://192.168.0.245:8080/organizationsystem/api/department')
+                    .then((res)=> {
+                        this.departs = res.data;
+                        return res.data
+                    }).catch(function(){alert("직원 목록 조회를 실패했습니다.")});
+                },
+        		init: function(){
+                    this.name = "";
+                    this.position = "";
+                    this.hiredDate = "";
+                    this.birth = "";
+                    this.departId = 1;
+                },
+        		submit: async function(){
+                    if(this.name.replace(/\s|　/gi, "").length == 0){
+                        alert("내용을 입력해주세요.")
+                    }else{
+                    await axios.post('http://192.168.0.245:8080/organizationsystem/api/employee',{
+                        name: this.name,
+                        position: this.position,
+                        hiredDate: this.hiredDate,
+                        birth: this.birth,
+                        depart_id: this.departId
+                    }).then(function(){alert("직원이 등록되었습니다.")}).catch(function(){alert("직원 등록에 실패했습니다.")});
+                        this.employList();
+                        this.init();
+                    }
+                    
+                }
+        	},
+        	mounted: async function(){
+        		await this.getDepartList();
+        		await this.employList();
+        	}
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="organizationsystem.rao.itf.EmployeeRAO">
+    
+    <select id="selectEmployees" resultType="EmployeeDTO">
+        SELECT d.name dName, e.* 
+        FROM TEST.Department d JOIN TEST.Employee e ON d.id = e.depart_id ORDER BY e.id
+    </select>
+    
+    <select id="selectEmployeeById" resultType="EmployeeDTO">
+        SELECT d.name dName, e.* 
+        FROM TEST.Department d JOIN TEST.Employee e ON d.id = e.depart_id
+        WHERE e.id = #{id}
+    </select>
+    
+    <select id="selectMaxId" resultType="Integer">
+        SELECT NVL(MAX(id), 0) FROM TEST.Employee
+    </select>
+    
+    <insert id="insertEmployee">
+        INSERT INTO TEST.Employee(id, name, position, hiredDate, birth, depart_id) 
+        VALUES (#{id}, #{name}, #{position}, #{hiredDate}, #{birth}, #{depart_id})
+    </insert>
+    
+    <update id="updateEmployee">
+        UPDATE TEST.Employee 
+        SET name = #{name}, position = #{position}, 
+            hiredDate = #{hiredDate}, birth = #{birth}, depart_id = #{depart_id}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updateEmployeeTo" parameterType= "hashmap">
+        UPDATE TEST.Employee SET depart_id = #{toDId}
+        WHERE depart_id = #{fromDId}
+    </update>
+    
+    <delete id="deleteEmployee">
+        DELETE FROM TEST.Employee WHERE id = #{id}
+    </delete>
+    
+    <select id="selectEmployeeByDepartId" resultType="EmployeeDTO">
+        SELECT * FROM TEST.Employee WHERE depart_id = #{depart_id} ORDER BY id
+    </select>
+
+    <select id="selectEmployeesNumber" resultType="Integer">
+        SELECT COUNT(*) FROM TEST.Employee
+    </select>
+    
+    <select id="selectEmployeesByPage" resultType="EmployeeDTO">
+        SELECT d.name dName, e.* 
+        FROM TEST.Department d JOIN TEST.Employee e ON d.id = e.depart_id 
+        ORDER BY id 
+        LIMIT 10 OFFSET #{page}
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

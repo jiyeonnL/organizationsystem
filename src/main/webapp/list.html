@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script> 
+<meta charset="utf-8">
+<title>부서</title>
+<link rel="stylesheet" type="text/css" href = "css/all.css">
+<style>
+.inputs{
+    font-family:'Gowun Dodum' , sans-serif;
+    font-weight: bold;
+}
+.bt{
+    background-color: rgb(71, 117, 209);
+}
+.bt:hover{
+    background-color: rgb(41, 82, 163);
+}
+
+</style>
+
+</head>
+<body>
+<div id="body">
+<div id="inner">
+<h2 class="heavy">부서 목록</h2>
+<br/>
+<h4 class="heavy"><a href="list_E.html">직원 조회하러 가기</a></h4>
+<br/>
+
+ <table class="clean">
+   <thead>
+     <tr>
+       <th>부서명</th>
+       <th>부서장</th>
+       <th>위치</th>
+       <th>연락처</th>
+     </tr>
+   </thead>
+   <tbody id="departAll">
+     <tr v-for="depart in departs">
+       <td><a v-bind:href="'info.html?index='+depart.id">{{depart.name}}</a></td>                         
+       <td>{{depart.head}}</td>                          
+       <td>{{depart.location}}</td>         
+       <td>{{depart.contact}}</td>
+     </tr>
+                                
+   </tbody>
+ </table>
+
+<br/><br/><br/>
+
+
+<h3 class="heavy">부서 등록</h3>
+
+&nbsp&nbsp
+
+<div class="clean" id="addDepart">
+        <span>
+          <input type="text" v-model="name" class="inputs" placeholder="부서명">
+        </span>
+        
+        <span>
+          <input type="text" v-model="head" class="inputs" placeholder="부서장">
+        </span>
+        
+        <span>
+          <input type="text" v-model="location" class="inputs" placeholder="위치">
+        </span>
+        
+        <span>
+          <input type="text" v-model="contact" class="inputs" placeholder="연락처">
+        </span>
+                      
+    &nbsp <button class="bt" type="submit" id="submit" @click="submit">등록</button>
+    <!-- <button class="btn btn-warning" id="cancel">취소</button>  -->
+</div>
+    <br/><br/><br/>
+ </div>
+ </div>
+
+            
+   <!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- <script src="jquery/list.js"></script> -->
+    <script>
+    new Vue({
+    	el: '#inner',
+    	data:{
+    		departs: [ ],
+    		name: "",
+            head: "",
+            location: "",
+            contact: ""
+    	},
+    	methods: {
+    		departList: async function(){
+    			await axios.get('http://192.168.0.245:8080/organizationsystem/api/department')
+    			.then((res)=> {
+    				this.departs = res.data;
+    				return res.data
+    			}).catch(function(){alert("부서 목록 조회를 실패했습니다.")});
+    		},
+    		init : function(){
+    			name = "";
+    			head = "";
+    			location = "";
+    			contact = "";
+    		},
+    		submit: async function(){
+    			if(this.name.replace(/\s|　/gi, "").length == 0){
+    				alert("내용을 입력해주세요.")
+    			}else{
+                await axios.post('http://192.168.0.245:8080/organizationsystem/api/department',{
+                    name: this.name,
+                    head: this.head,
+                    location: this.location,
+                    contact: this.contact
+                }).then(function(){alert("부서가 등록되었습니다.")}).catch(function(){alert("부서 등록에 실패했습니다.")});
+                    this.departList();
+                    this.init();
+    			}
+    			
+            }
+    	},
+    	mounted: async function(){
+    		await this.departList();
+    	}
+    	
+    });
+    
+    $(window).bind("pageshow", function(event) {
+        if (event.originalEvent.persisted) {
+             location.reload();
+        }
+    });
+    
+    </script>
+    
+</body>
+</html>

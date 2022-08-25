@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script> 
+<meta charset="UTF-8">
+<title>부서 상세조회</title>
+<link rel="stylesheet" type="text/css" href = "css/all.css">
+<link rel="stylesheet" type="text/css" href = "css/info.css">
+<style>
+.inputs, .inputsE{
+    font-family:'Gowun Dodum' , sans-serif;
+    font-weight: bold;
+}
+</style>
+
+</head>
+<body>
+<div id="body">
+<div id="inner">
+<h2 class="heavy">부서 상세조회</h2>
+<br/><br/>
+
+ <table class="table clean">
+   <thead>
+     <tr>
+       <th>부서명</th>
+       <th>부서장</th>
+       <th>위치</th>
+       <th>연락처</th>
+       <th> </th>
+     </tr>
+   </thead>
+   <tbody>
+     <tr id="departOne">
+       <td><input type="text" class="inputs" v-model="depart.name" :readonly="!onoff"></td>     
+       <td><input type="text" class="inputs" v-model="depart.head" :readonly="!onoff"></td>
+       <td><input type="text" class="inputs" v-model="depart.location" :readonly="!onoff"></td>
+       <td><input type="text" class="inputs" v-model="depart.contact" :readonly="!onoff"></td>
+       <td>
+          <button class="bt bt-normal" :id="modify" @click="doModify">{{modifyWord}}</button>
+          <button class="bt" id="remove" @click="doRemove" :style="showRemove">삭제</button>
+          <button class="bt bt-normal" @click="doModifySubmit" :style="showSubmit">저장</button>
+       </td>
+     </tr>                          
+   </tbody>
+ </table>
+ 
+ <br/> <br/> <br/>
+ <!-- 해당 부서 직원목록 조회 -->
+  <h3 class="heavy">직원 목록</h3>
+  <table class="table clean">
+   <thead>
+     <tr>
+       <th>이름</th>
+       <th>직급</th>
+       <th>입사일</th>
+       <th>생년월일</th>
+     </tr>
+   </thead>
+   <tbody id="employThis">   
+     <tr :style="noEmploy">
+       <td colspan="4">이 부서에 등록된 직원이 아직 없습니다.</td>
+     </tr>
+     <tr v-for="employ in employs">
+       <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>
+       <td>{{employ.position}}</td>
+       <td>{{employ.hiredDate}}</td>
+       <td>{{employ.birth}}</td>
+     </tr>                       
+   </tbody>
+ </table>
+ 
+ <br/><br/><br/>
+ 
+<h3 class="heavy">직원 등록</h3>
+&nbsp&nbsp
+
+    <div class="clean">
+    <span>
+      <input type="text" v-model="depart.name" readonly>
+    </span>
+       
+    <span>
+      <input type="text" v-model="eName" class="inputsE" placeholder="이름">
+    </span>
+                   
+    <span>
+      <input type="text" v-model="position" class="inputsE" placeholder="직급">
+    </span>
+                        
+    <span>
+      <input type="text" v-model="hiredDate" class="inputsE" placeholder="입사일">
+    </span>
+    
+    <span>
+      <input type="text" v-model="birth" class="inputsE" placeholder="생년월일">
+    </span>
+    
+    &nbsp <button class="bt bt-normal" type="submit" id="submit" @click="addEmploy">등록</button>
+    <!-- <button class="btn btn-warning" id="cancel">취소</button>  -->
+    </div>
+    
+    <br/><br/>
+
+</div>
+</div>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- <script src="jquery/info.js"></script>   -->
+
+    <script>
+
+        new Vue({
+        	el: '#inner',
+        	data:{
+        		depart: [ ],
+        		num: 0,
+        		onoff: false,
+        		modify: "modify",
+        		modifyWord: "수정",
+        		showSubmit: "display:none",
+        		showRemove: "display:inline-block",
+        		employs: [ ],
+        		eName: "",
+        		position: "",
+        		hiredDate: "",
+        		birth: "",
+        		noEmploy: "display:none"
+        		
+        	},
+        	methods: {
+        		get_query: function(){
+        			var url = document.location.href;
+        		    var qs = url.substring(url.indexOf('?') + 1).split('&');
+        		    for (var i = 0, result = {}; i < qs.length; i++) {
+        		        qs[i] = qs[i].split('=');
+        		        result[qs[i][0]] = decodeURIComponent(qs[i][1]);
+        		    }
+        		    return result;
+        		},
+        		departOne: async function(){
+        			this.num = this.get_query()['index'];
+                    await axios.get('http://192.168.0.245:8080/organizationsystem/api/department/'+this.num)
+                    .then((res)=> {
+                        this.depart = res.data;
+                        return res.data
+                    }).catch(function(){alert("부서를 조회할 수 없습니다.")});
+                },
+                doRemove: async function(){
+                	if(this.num == 1){
+                        alert('이 부서는 삭제할 수 없습니다.');
+                    }else{
+                    	await axios.delete('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num)
+                    	.then(function(){
+                    		alert('부서가 삭제되었습니다.');
+                    		window.history.back();
+                    	}).catch(function(){alert("부서 삭제에 실패했습니다.")});
+                    }
+                },
+                clickCancel: async function(){
+                	this.departOne(); //취소
+                    this.onoff = false;
+                    this.modify = "modify";
+                    this.modifyWord = "수정";
+                    this.showSubmit = "display:none";
+                    this.showRemove = "display:inline-block";
+                },
+                doModify: async function(){
+                	if(this.onoff){
+                		this.clickCancel();
+                    }else{
+                        this.onoff = true;
+                        this.modify = "cancel";
+                        this.modifyWord = "취소";
+                        this.showSubmit = "display:inline-block";
+                        this.showRemove = "display:none";
+                    }
+                },
+                doModifySubmit: async function(){
+                	await axios.put('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num,{
+                        name: this.depart.name,
+                        head: this.depart.head,
+                        location: this.depart.location,
+                        contact: this.depart.contact
+                        
+                    }).then(function(){alert("부서가 수정되었습니다.")}).catch(function(){alert("부서 수정에 실패했습니다.")});
+                	this.clickCancel();
+                },
+                employList: async function(){
+                    await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/depart/' + this.num)
+                    .then((res)=> {
+                        this.employs = res.data;
+                        if(this.employs.length == 0){
+                        	console.log("직원이 없음");
+                        	this.noEmploy = "display:";
+                        }
+                        return res.data
+                    }).catch(function(){alert("직원 목록 조회를 실패했습니다.")});
+                },
+                init : function(){
+                    this.eName = "";
+                    this.position = "";
+                    this.hiredDate = "";
+                    this.birth = "";
+                },
+                addEmploy: async function(){
+                	if(this.eName.replace(/\s|　/gi, "").length == 0){
+                        alert('내용을 입력해주세요.');
+                    }else{
+                    	await axios.post('http://192.168.0.245:8080/organizationsystem/api/employee',{
+                            name: this.eName,
+                            position: this.position,
+                            hiredDate: this.hiredDate,
+                            birth: this.birth,
+                            depart_id: this.num
+                        }).then(function(){alert("직원이 등록되었습니다.")}).catch(function(){alert("직원 등록에 실패했습니다.")});
+                    	this.noEmploy = "display:none";
+                    	this.employList();
+                    	this.init();
+                    }
+                }
+        	},
+        	mounted: async function(){
+        		await this.departOne();
+        		await this.employList();
+        	}
+        	
+        
+        })
+    </script>
+</body>
+</html>
