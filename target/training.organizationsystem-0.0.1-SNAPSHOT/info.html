@@ -9,6 +9,7 @@
 <title>부서 상세조회</title>
 <link rel="stylesheet" type="text/css" href = "css/all.css">
 <link rel="stylesheet" type="text/css" href = "css/info.css">
+<script src="https://kit.fontawesome.com/7e4aa9083d.js" crossorigin="anonymous"></script>
 <style>
 .inputs, .inputsE{
     font-family:'Gowun Dodum' , sans-serif;
@@ -21,6 +22,8 @@
 <div id="body">
 <div id="inner">
 <h2 class="heavy">부서 상세조회</h2>
+<br/>
+<h4 class="heavy"><a href="list.html"><i class="fa-solid fa-arrow-left-long"></i> 부서 목록으로 돌아가기</a></h4>
 <br/><br/>
 
  <table class="table clean">
@@ -35,14 +38,14 @@
    </thead>
    <tbody>
      <tr id="departOne">
-       <td><input type="text" class="inputs" v-model="depart.name" :readonly="!onoff"></td>     
-       <td><input type="text" class="inputs" v-model="depart.head" :readonly="!onoff"></td>
-       <td><input type="text" class="inputs" v-model="depart.location" :readonly="!onoff"></td>
-       <td><input type="text" class="inputs" v-model="depart.contact" :readonly="!onoff"></td>
+       <td><input type="text" class="inputs" v-model="depart.name" :disabled="!onoff"></td>     
+       <td><input type="text" class="inputs" v-model="depart.head" :disabled="!onoff"></td>
+       <td><input type="text" class="inputs" v-model="depart.location" :disabled="!onoff"></td>
+       <td><input type="text" class="inputs" v-model="depart.contact" :disabled="!onoff"></td>
        <td>
           <button class="bt bt-normal" :id="modify" @click="doModify">{{modifyWord}}</button>
-          <button class="bt" id="remove" @click="doRemove" :style="showRemove">삭제</button>
-          <button class="bt bt-normal" @click="doModifySubmit" :style="showSubmit">저장</button>
+          <button class="bt" id="remove" @click="doRemove" v-if="!onoff">삭제</button>
+          <button class="bt bt-normal" @click="doModifySubmit" v-if="onoff">저장</button>
        </td>
      </tr>                          
    </tbody>
@@ -61,14 +64,14 @@
      </tr>
    </thead>
    <tbody id="employThis">   
-     <tr :style="noEmploy">
+     <tr v-if="noEmploy">
        <td colspan="4">이 부서에 등록된 직원이 아직 없습니다.</td>
      </tr>
      <tr v-for="employ in employs">
-       <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>
-       <td>{{employ.position}}</td>
-       <td>{{employ.hiredDate}}</td>
-       <td>{{employ.birth}}</td>
+       <td><a v-bind:href="'info_E.html?index='+employ[0]">{{employ[1]}}</a></td>
+       <td>{{employ[2]}}</td>
+       <td>{{employ[3]}}</td>
+       <td>{{employ[4]}}</td>
      </tr>                       
    </tbody>
  </table>
@@ -80,7 +83,7 @@
 
     <div class="clean">
     <span>
-      <input type="text" v-model="depart.name" readonly>
+      <input type="text" v-model="depart.name" disabled>
     </span>
        
     <span>
@@ -122,14 +125,13 @@
         		onoff: false,
         		modify: "modify",
         		modifyWord: "수정",
-        		showSubmit: "display:none",
-        		showRemove: "display:inline-block",
         		employs: [ ],
         		eName: "",
         		position: "",
         		hiredDate: "",
         		birth: "",
-        		noEmploy: "display:none"
+        		noEmploy: false,
+        		confirmRemove: false
         		
         	},
         	methods: {
@@ -154,21 +156,17 @@
                 	if(this.num == 1){
                         alert('이 부서는 삭제할 수 없습니다.');
                     }else{
-                    	await axios.delete('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num)
-                    	.then(function(){
-                    		alert('부서가 삭제되었습니다.');
-                    		window.history.back();
-                    	}).catch(function(){alert("부서 삭제에 실패했습니다.")});
+                    	this.confirmRemove = confirm("정말 삭제하시겠습니까?");
+                        if(this.confirmRemove){
+                    	    await axios.delete('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num)
+                    	    .then(function(){
+                    		    alert('부서가 삭제되었습니다.');
+                    		    window.history.back();
+                    	    }).catch(function(){alert("부서 삭제에 실패했습니다.")});
+                        }
                     }
                 },
-                clickCancel: async function(){
-                	this.departOne(); //취소
-                    this.onoff = false;
-                    this.modify = "modify";
-                    this.modifyWord = "수정";
-                    this.showSubmit = "display:none";
-                    this.showRemove = "display:inline-block";
-                },
+               
                 doModify: async function(){
                 	if(this.onoff){
                 		this.clickCancel();
@@ -176,27 +174,40 @@
                         this.onoff = true;
                         this.modify = "cancel";
                         this.modifyWord = "취소";
-                        this.showSubmit = "display:inline-block";
-                        this.showRemove = "display:none";
                     }
                 },
                 doModifySubmit: async function(){
-                	await axios.put('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num,{
-                        name: this.depart.name,
-                        head: this.depart.head,
-                        location: this.depart.location,
-                        contact: this.depart.contact
+                	if(this.depart.name.replace(/\s|　/gi, "").length == 0){
+                        alert("부서명을 입력해주세요.")
+                    }else{
+                    	
+                	    await axios.put('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num,{
+                            name: this.depart.name,
+                            head: this.depart.head,
+                            location: this.depart.location,
+                            contact: this.depart.contact
                         
-                    }).then(function(){alert("부서가 수정되었습니다.")}).catch(function(){alert("부서 수정에 실패했습니다.")});
-                	this.clickCancel();
+                       }).then(function(){
+                        	alert("부서가 수정되었습니다.");
+                        }).catch(function(){
+                    	    alert("부서 수정에 실패했습니다.");
+                        });
+                        this.clickCancel();
+                    	
+                    }
+                	
+                	
+                	
+                	
                 },
                 employList: async function(){
                     await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/depart/' + this.num)
                     .then((res)=> {
                         this.employs = res.data;
+                        //console.log(this.employs[0][1]); - 왜 이렇지...?
                         if(this.employs.length == 0){
                         	console.log("직원이 없음");
-                        	this.noEmploy = "display:";
+                        	this.noEmploy = true;
                         }
                         return res.data
                     }).catch(function(){alert("직원 목록 조회를 실패했습니다.")});
@@ -218,10 +229,16 @@
                             birth: this.birth,
                             depart_id: this.num
                         }).then(function(){alert("직원이 등록되었습니다.")}).catch(function(){alert("직원 등록에 실패했습니다.")});
-                    	this.noEmploy = "display:none";
+                    	this.noEmploy = false;
                     	this.employList();
                     	this.init();
                     }
+                },
+                clickCancel: function(){
+                    this.onoff = false;
+                    this.modify = "modify";
+                    this.modifyWord = "수정";
+                    this.departOne(); //취소
                 }
         	},
         	mounted: async function(){
@@ -230,7 +247,14 @@
         	}
         	
         
-        })
+        });
+        
+        $(window).bind("pageshow", function(event) {
+            if (event.originalEvent.persisted) {
+                 location.reload();
+            }
+        });
+        
     </script>
 </body>
 </html>

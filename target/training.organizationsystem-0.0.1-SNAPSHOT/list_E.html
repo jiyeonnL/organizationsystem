@@ -8,6 +8,7 @@
 <meta charset="UTF-8">
 <title>직원</title>
 <link rel="stylesheet" type="text/css" href = "css/all.css">
+<script src="https://kit.fontawesome.com/7e4aa9083d.js" crossorigin="anonymous"></script>
 <style>
 .bt{
     background-color: rgb(71, 117, 209);
@@ -32,7 +33,7 @@
 <div id="inner">
 <h2 class="heavy">직원 목록</h2>
 <br/>
-<h4 class="heavy"><a href="list.html">부서 조회하러 가기</a></h4>
+<h4 class="heavy"><a href="list.html"><i class="fa-solid fa-building-user"></i> 부서 조회하러 가기</a></h4>
 <br/><br/>
 
 <table class="table clean">
@@ -47,7 +48,7 @@
    </thead>
    <tbody id="employAll">
        <tr v-for="employ in employs">
-         <td>{{employ.dname}}</td>
+         <td>{{employ.department.name}}</td>
          <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>                         
          <td>{{employ.position}}</td>                          
          <td>{{employ.hiredDate}}</td>         
@@ -57,10 +58,11 @@
 </table>
 
 <br/><br/>
-
-<span id="pages">
+<button id="prev" @click="goPrev" v-if="showPrev"> < </button>
+<span id="pages" v-for="button in buttons" >
+    <button class="pbt" :id="button" @click="pageClick(button)">{{button}}</button>
 </span>
-
+<button id="next" @click="goNext" v-if="showNext"> > </button>
 <br/><br/><br/><br/>
 
 <h3 class="heavy">직원 등록</h3>
@@ -111,7 +113,16 @@
                 name: "",
                 position: "",
                 hiredDate: "",
-                birth: ""
+                birth: "",
+                employNum: 0,
+                pageNum: 0,
+                groupNum: 0,
+                nowGroup: 1,
+                nowPage: 0,
+                prevPage: 0,
+                buttons: [ ],
+                showPrev: true,
+                showNext: true
         	},
         	methods:{
         		employList: async function(){
@@ -137,7 +148,7 @@
                 },
         		submit: async function(){
                     if(this.name.replace(/\s|　/gi, "").length == 0){
-                        alert("내용을 입력해주세요.")
+                        alert("이름을 입력해주세요.")
                     }else{
                     await axios.post('http://192.168.0.245:8080/organizationsystem/api/employee',{
                         name: this.name,
@@ -146,17 +157,87 @@
                         birth: this.birth,
                         depart_id: this.departId
                     }).then(function(){alert("직원이 등록되었습니다.")}).catch(function(){alert("직원 등록에 실패했습니다.")});
-                        this.employList();
+                        //리스트 가져오기
                         this.init();
+                        await this.getNumbers();
+                        //console.log("직원수151?:"+this.employNum+ "페이지수16?:"+this.pageNum + ", 그룹수4?:"+ this.groupNum);
+                        this.nowPage = (this.pageNum-1)*10;
+                        this.nowGroup = this.groupNum;
+                        //console.log("현재페이지150?:"+this.nowPage + ", 현재그룹4?:"+ this.nowGroup);
+                        this.setButtons();
+                        this.employListByPage();
                     }
-                    
+                },
+                getNumbers: async function(){
+                    await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/num')
+                    .then((res)=> {
+                        this.employNum = res.data;
+                        //console.log(res.data);
+                        this.pageNum = Math.ceil(this.employNum / 10);
+                        //console.log(this.pageNum);
+                        this.groupNum = Math.ceil(this.pageNum / 5);
+                        //console.log(this.groupNum);
+                        return res.data;
+                    });
+                },
+                employListByPage: async function(){
+                    await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/page/'+this.nowPage)
+                    .then((res)=> {
+                        this.employs = res.data;
+                        this.prevPage = this.nowPage;
+                        $('.clickedBt').attr('class', 'pbt');
+                        $('#'+ (this.nowPage/10 + 1)).attr('class', 'pbt clickedBt');
+                        //console.log(this.employs[0].department.name);
+                        return res.data
+                    })
+                },
+                setButtons: async function(){
+                	this.buttons = [];
+                	for(let i = this.nowGroup*5 -4; i <= this.nowGroup*5; i++){
+                        if(i > this.pageNum || i < 1) break;
+                        this.buttons.push(i);
+                        this.showPrev = true;
+                        this.showNext = true;
+                        if(this.nowGroup == 1){
+                        	this.showPrev = false;
+                        }else if(this.nowGroup == this.groupNum){
+                        	this.showNext = false;
+                        }
+                    }
+                },
+                goPrev: async function(){
+                	this.nowGroup--;
+                	this.setButtons();
+                	this.nowPage = (this.nowGroup*5-1)*10;
+                    this.employListByPage();
+                },
+                goNext: async function(){
+                	this.nowGroup++;
+                	this.setButtons();
+                	this.nowPage = (this.nowGroup*5-5)*10;
+                	this.employListByPage();
+                },
+                pageClick: async function(num){
+                	this.nowPage = (num -1) * 10;
+                	this.employListByPage();
                 }
+                
         	},
         	mounted: async function(){
         		await this.getDepartList();
-        		await this.employList();
+        		await this.getNumbers();
+                await this.employListByPage();
+                await this.setButtons();
+        		//리스트 가져오기
         	}
         });
+        
+        $(window).bind("pageshow", function(event) {
+            if (event.originalEvent.persisted) {
+                 location.reload();
+            }
+        });
+
     </script>
 </body>
 </html>

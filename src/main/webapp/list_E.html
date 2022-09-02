@@ -48,7 +48,7 @@
    </thead>
    <tbody id="employAll">
        <tr v-for="employ in employs">
-         <td>{{employ.dname}}</td>
+         <td>{{employ.department.name}}</td>
          <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>                         
          <td>{{employ.position}}</td>                          
          <td>{{employ.hiredDate}}</td>         
@@ -148,7 +148,7 @@
                 },
         		submit: async function(){
                     if(this.name.replace(/\s|　/gi, "").length == 0){
-                        alert("내용을 입력해주세요.")
+                        alert("이름을 입력해주세요.")
                     }else{
                     await axios.post('http://192.168.0.245:8080/organizationsystem/api/employee',{
                         name: this.name,
@@ -159,9 +159,11 @@
                     }).then(function(){alert("직원이 등록되었습니다.")}).catch(function(){alert("직원 등록에 실패했습니다.")});
                         //리스트 가져오기
                         this.init();
-                        this.getNumbers();
+                        await this.getNumbers();
+                        //console.log("직원수151?:"+this.employNum+ "페이지수16?:"+this.pageNum + ", 그룹수4?:"+ this.groupNum);
                         this.nowPage = (this.pageNum-1)*10;
                         this.nowGroup = this.groupNum;
+                        //console.log("현재페이지150?:"+this.nowPage + ", 현재그룹4?:"+ this.nowGroup);
                         this.setButtons();
                         this.employListByPage();
                     }
@@ -170,11 +172,11 @@
                     await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/num')
                     .then((res)=> {
                         this.employNum = res.data;
-                        console.log(res.data);
+                        //console.log(res.data);
                         this.pageNum = Math.ceil(this.employNum / 10);
-                        console.log(this.pageNum);
+                        //console.log(this.pageNum);
                         this.groupNum = Math.ceil(this.pageNum / 5);
-                        console.log(this.groupNum);
+                        //console.log(this.groupNum);
                         return res.data;
                     });
                 },
@@ -185,6 +187,7 @@
                         this.prevPage = this.nowPage;
                         $('.clickedBt').attr('class', 'pbt');
                         $('#'+ (this.nowPage/10 + 1)).attr('class', 'pbt clickedBt');
+                        //console.log(this.employs[0].department.name);
                         return res.data
                     })
                 },

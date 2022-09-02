@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import organizationsystem.biz.itf.DepartmentMgt;
 import organizationsystem.dto.DepartmentDTO;
+import organizationsystem.entity.Department;
 import organizationsystem.except.OrganizationSystemException;
 
 
@@ -33,7 +34,7 @@ public class DepartmentController {
 	}
 	
 	@GetMapping(path = "/department/{id}", produces = "application/json")
-	public DepartmentDTO readDepartmentById(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") Integer id) {
+	public Department readDepartmentById(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") Integer id) {
 		return departmentMgt.readDepartmentById(id);
 	}
 	

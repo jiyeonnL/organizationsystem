@@ -103,6 +103,8 @@
     			await axios.get('http://192.168.0.245:8080/organizationsystem/api/department')
     			.then((res)=> {
     				this.departs = res.data;
+
+                    //console.log(this.departs[1].name);
     				return res.data
     			}).catch(function(){alert("부서 목록 조회를 실패했습니다.")});
     		},
@@ -114,14 +116,24 @@
     		},
     		submit: async function(){
     			if(this.name.replace(/\s|　/gi, "").length == 0){
-    				alert("내용을 입력해주세요.")
+    				alert("부서명을 입력해주세요.")
     			}else{
                 await axios.post('http://192.168.0.245:8080/organizationsystem/api/department',{
                     name: this.name,
                     head: this.head,
                     location: this.location,
                     contact: this.contact
-                }).then(function(){alert("부서가 등록되었습니다.")}).catch(function(){alert("부서 등록에 실패했습니다.")});
+                }).then(function(){
+                	alert("부서가 등록되었습니다.");
+                	
+                })
+                .catch(function(){
+                	alert("부서 등록에 실패했습니다.");
+                	/* console.log(error.response.status);    //500                                 
+                	console.log(error.message);     
+                	console.log(error.config.data); */
+                	//console.log(response.data);
+                });
                     this.departList();
                     this.init();
     			}

@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 html, #body{
-    background-color: rgb(255, 242, 229);
+	background-color: rgb(255, 242, 229);
 }
 #inner{
     width : 80%;
