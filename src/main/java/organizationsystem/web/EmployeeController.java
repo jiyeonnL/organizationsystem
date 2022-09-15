@@ -18,6 +18,7 @@ import organizationsystem.biz.EmployeeImpl;
 import organizationsystem.biz.itf.EmployeeMgt;
 import organizationsystem.dto.DepartmentDTO;
 import organizationsystem.dto.EmployeeDTO;
+import organizationsystem.entity.Employee;
 import organizationsystem.except.OrganizationSystemException;
 
 @RestController
@@ -26,10 +27,10 @@ public class EmployeeController {
 	@Autowired
 	EmployeeMgt employeeMgt;
 	
-	@GetMapping(path = "/employee",  produces = "application/json")
-	public Object readEmployees(HttpServletRequest request, HttpServletResponse response){
-		return employeeMgt.findEmployees();
-	}
+	//@GetMapping(path = "/employee",  produces = "application/json")
+	//public Object readEmployees(HttpServletRequest request, HttpServletResponse response){
+	//	return employeeMgt.findEmployees();
+	//}
 	
 	@GetMapping(path = "/employee/num",  produces = "application/json")
 	public int findEmployeesNum(HttpServletRequest request, HttpServletResponse response){
@@ -42,7 +43,7 @@ public class EmployeeController {
 	}
 	
 	@GetMapping(path = "/employee/{id}", produces = "application/json")
-	public EmployeeDTO readEmployeeById(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") Integer id) {
+	public Employee readEmployeeById(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") Integer id) {
 		return employeeMgt.readEmployeeById(id);
 	}
 	

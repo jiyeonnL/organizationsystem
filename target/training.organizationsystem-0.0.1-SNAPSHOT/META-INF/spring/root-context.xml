@@ -56,6 +56,36 @@
     </bean>
     
     <jee:jndi-lookup jndi-name="java:/RadiusXADS" id="radiusXADataSource" />
+    
+    <!--  add jpa settings -->
+    <jee:jndi-lookup id="entityManagerFactory" jndi-name="java:/persistence/organizationsystem/entityManagerFactory" />
+    <jee:jndi-lookup id="entityManager" jndi-name="java:/persistence/organizationsystem/entityManager" />
+    
+     <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" >
+     </bean>
+      
+     <tx:advice id="txAdvice" transaction-manager="txManager">
+       <tx:attributes>
+         <tx:method name="*" rollback-for="RuntimeException" />
+       </tx:attributes>
+     </tx:advice> 
+ 
+     <aop:config>
+       <aop:pointcut id="componentOperation" expression="execution(* organizationsystem.biz.itf.*.*(..))" />
+       <aop:advisor advice-ref="txAdvice" pointcut-ref="componentOperation" /> 
+     </aop:config>
+
+     <bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+     </bean>
+     
+     <!-- 
+     <bean class="organizationsystem.rao.DepartmentJpaRao">      
+     </bean>
+     <bean class="organizationsystem.rao.EmployeeJpaRao">      
+     </bean>
+      -->
+
+     
 
     <!-- 
     <mybatis-spring:scan base-package="organizationsystem"></mybatis-spring:scan>

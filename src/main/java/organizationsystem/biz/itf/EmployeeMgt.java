@@ -3,15 +3,16 @@ package organizationsystem.biz.itf;
 import java.util.List;
 
 import organizationsystem.dto.EmployeeDTO;
+import organizationsystem.entity.Employee;
 import organizationsystem.except.OrganizationSystemException;
 
 public interface EmployeeMgt {
 	
-    public List<EmployeeDTO> findEmployees();
+    //public List<Employee> findEmployees();
     
-    public List<EmployeeDTO> readEmployeesByPage(int page);
+    public List<Employee> readEmployeesByPage(int page);
     
-    public EmployeeDTO readEmployeeById(int id);
+    public Employee readEmployeeById(int id);
 	
 	public int registerEmployee(EmployeeDTO dto)throws OrganizationSystemException;
 	
@@ -19,7 +20,7 @@ public interface EmployeeMgt {
 	
 	public void removeEmployee(int id);
 	
-	public List<EmployeeDTO> readEmployeeByDepartId(int dId);
+	public List<Employee> readEmployeeByDepartId(int dId);
 	
 	/**
 	 * 직원들 부서이동

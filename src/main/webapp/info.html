@@ -68,10 +68,10 @@
        <td colspan="4">이 부서에 등록된 직원이 아직 없습니다.</td>
      </tr>
      <tr v-for="employ in employs">
-       <td><a v-bind:href="'info_E.html?index='+employ.id">{{employ.name}}</a></td>
-       <td>{{employ.position}}</td>
-       <td>{{employ.hiredDate}}</td>
-       <td>{{employ.birth}}</td>
+       <td><a v-bind:href="'info_E.html?index='+employ[0]">{{employ[1]}}</a></td>
+       <td>{{employ[2]}}</td>
+       <td>{{employ[3]}}</td>
+       <td>{{employ[4]}}</td>
      </tr>                       
    </tbody>
  </table>
@@ -130,7 +130,8 @@
         		position: "",
         		hiredDate: "",
         		birth: "",
-        		noEmploy: false
+        		noEmploy: false,
+        		confirmRemove: false
         		
         	},
         	methods: {
@@ -155,19 +156,17 @@
                 	if(this.num == 1){
                         alert('이 부서는 삭제할 수 없습니다.');
                     }else{
-                    	await axios.delete('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num)
-                    	.then(function(){
-                    		alert('부서가 삭제되었습니다.');
-                    		window.history.back();
-                    	}).catch(function(){alert("부서 삭제에 실패했습니다.")});
+                    	this.confirmRemove = confirm("정말 삭제하시겠습니까?");
+                        if(this.confirmRemove){
+                    	    await axios.delete('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num)
+                    	    .then(function(){
+                    		    alert('부서가 삭제되었습니다.');
+                    		    window.history.back();
+                    	    }).catch(function(){alert("부서 삭제에 실패했습니다.")});
+                        }
                     }
                 },
-                clickCancel: async function(){
-                	this.departOne(); //취소
-                    this.onoff = false;
-                    this.modify = "modify";
-                    this.modifyWord = "수정";
-                },
+               
                 doModify: async function(){
                 	if(this.onoff){
                 		this.clickCancel();
@@ -178,19 +177,34 @@
                     }
                 },
                 doModifySubmit: async function(){
-                	await axios.put('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num,{
-                        name: this.depart.name,
-                        head: this.depart.head,
-                        location: this.depart.location,
-                        contact: this.depart.contact
+                	if(this.depart.name.replace(/\s|　/gi, "").length == 0){
+                        alert("부서명을 입력해주세요.")
+                    }else{
+                    	
+                	    await axios.put('http://192.168.0.245:8080/organizationsystem/api/department/'+ this.num,{
+                            name: this.depart.name,
+                            head: this.depart.head,
+                            location: this.depart.location,
+                            contact: this.depart.contact
                         
-                    }).then(function(){alert("부서가 수정되었습니다.")}).catch(function(){alert("부서 수정에 실패했습니다.")});
-                	this.clickCancel();
+                       }).then(function(){
+                        	alert("부서가 수정되었습니다.");
+                        }).catch(function(){
+                    	    alert("부서 수정에 실패했습니다.");
+                        });
+                        this.clickCancel();
+                    	
+                    }
+                	
+                	
+                	
+                	
                 },
                 employList: async function(){
                     await axios.get('http://192.168.0.245:8080/organizationsystem/api/employee/depart/' + this.num)
                     .then((res)=> {
                         this.employs = res.data;
+                        //console.log(this.employs[0][1]); - 왜 이렇지...?
                         if(this.employs.length == 0){
                         	console.log("직원이 없음");
                         	this.noEmploy = true;
@@ -219,6 +233,12 @@
                     	this.employList();
                     	this.init();
                     }
+                },
+                clickCancel: function(){
+                    this.onoff = false;
+                    this.modify = "modify";
+                    this.modifyWord = "수정";
+                    this.departOne(); //취소
                 }
         	},
         	mounted: async function(){

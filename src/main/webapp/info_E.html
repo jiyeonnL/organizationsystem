@@ -78,7 +78,8 @@
         		modify: "modify",
                 modifyWord: "수정",
                 departs: [ ],
-                departId: 0
+                departId: 0,
+                confirmRemove: false
         	},
         	methods:{
         		get_query: function(){
@@ -99,11 +100,14 @@
                     }).catch(function(){alert("직원을 조회할 수 없습니다.")});
         		},
         		doRemove: async function(){
+        			this.confirmRemove = confirm("정말 삭제하시겠습니까?");
+        			if(this.confirmRemove){
                         await axios.delete('http://192.168.0.245:8080/organizationsystem/api/employee/'+ this.num)
                         .then(function(){
                             alert('직원이 삭제되었습니다.');
                             window.history.back();
                         }).catch(function(){alert("직원 삭제에 실패했습니다.")});
+        			}
                 },
                 clickCancel: async function(){
                     this.employOne(); //취소
@@ -121,15 +125,25 @@
                     }
                 },
                 doModifySubmit: async function(){
-                    await axios.put('http://192.168.0.245:8080/organizationsystem/api/employee/'+ this.num,{
-                        name: this.employ.name,
-                        position: this.employ.position,
-                        hiredDate: this.employ.hiredDate,
-                        birth: this.employ.birth,
-                        depart_id: this.departId
+                	
+                	if(this.employ.name.replace(/\s|　/gi, "").length == 0){
+                        alert("이름을 입력해주세요.")
+                    }else{
+                    	
+                        await axios.put('http://192.168.0.245:8080/organizationsystem/api/employee/'+ this.num,{
+                            name: this.employ.name,
+                            position: this.employ.position,
+                            hiredDate: this.employ.hiredDate,
+                            birth: this.employ.birth,
+                            depart_id: this.departId
                         
-                    }).then(function(){alert("직원이 수정되었습니다.")}).catch(function(){alert("직원 수정에 실패했습니다.")});
-                    this.clickCancel();
+                            }).then(function(){
+                            	   alert("직원이 수정되었습니다.")
+                            	    }).catch(function(){alert("직원 수정에 실패했습니다.")});
+                    
+                        this.clickCancel();
+                    	
+                    }
                 },
                 getDepartList: async function(){
                 	await axios.get('http://192.168.0.245:8080/organizationsystem/api/department')
@@ -142,7 +156,7 @@
         	mounted: async function(){
         		await this.employOne();
         		await this.getDepartList();
-        		this.departId = this.employ.depart_id;
+        		this.departId = this.employ.department.id;
         		console.log(this.departId);
         	}
         });
